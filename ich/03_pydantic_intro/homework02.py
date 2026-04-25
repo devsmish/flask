@@ -40,7 +40,7 @@ json_input = """{
     }"""
 '''
 
-from pydantic import BaseModel, ValidationError, Field, EmailStr, field_validator
+from pydantic import BaseModel, ValidationError, Field, EmailStr, model_validator
 
 
 class Address(BaseModel):
@@ -55,32 +55,20 @@ class User(BaseModel):
     is_employed: bool = Field(...)
     address: Address
 
-    # В @field_validator нельзя передать несколько параметров, а другие варианты мы не изучали
+    @model_validator(mode='after')
     def check_is_employed(self):
         if self.is_employed and not (18 <= self.age <= 65):
             raise ValueError("If user is employed, age must be between 18 and 65")
-
-    # @field_validator('is_employed')
-    # def check_is_employed(cls, value):
-    #     if value and 65 <= cls.age <= 18:
-    #         raise ValidationError("The user's employment status does not match their age!")
-    #     return True
-    #
-    # @model_validator(mode='after')
-    # def check_employment_age(self):
-    #     if self.is_employed and not (18 <= self.age <= 65):
-    #         raise ValueError("If user is employed, age must be between 18 and 65")
-    #     return self
+        return self
 
 def data_validator(data):
     try:
         user = User.model_validate_json(data, strict=True)
-        user.check_is_employed()
         return user.model_dump_json()
     except ValidationError as err:
-        print("Validation error:", err.json)
-    except ValueError as err:
-        print("ValueError error:", err)
+        print("Validation error:", err.json())
+    # except ValueError as err:
+    #     print("ValueError error:", err)
 
 if __name__ == '__main__':
     # valid
