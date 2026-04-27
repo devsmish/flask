@@ -25,8 +25,8 @@ class User(Base):
 # session.add_all([user1, user2])
 # session.commit()
 
-user = session.query(User.name).all()
-print(user)
+users = session.query(User.name).all()
+print(users)
 
 '''Задача 2: Подсчёт общего количества пользователей. Используйте функцию func.count() для подсчёта общего количества 
 пользователей в базе данных.'''
@@ -36,3 +36,14 @@ total_users2 = session.query(func.count())
 print(total_users2)
 total_users3 = session.query(func.count(User.id)).scalar()
 print(total_users3)
+
+'''Задача 3
+Напишите запрос для поиска пользователя по его уникальному идентификатору (id). Допустим, мы ищем пользователя 
+с id равным 1.'''
+user_id = 1
+total_users = session.get(User, user_id)
+
+if total_users:
+    print(f"Found user: {total_users.name}, Age: {total_users.age}")
+else:
+    print("User not found")
