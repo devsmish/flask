@@ -1,6 +1,6 @@
 '''Задача 1: Наполнение данными
 Добавьте в базу данных следующие категории и продукты'''
-from sqlalchemy import create_engine, Column, Integer, String, DECIMAL, Boolean, Text, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DECIMAL, Boolean, Text, ForeignKey, func
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 engine = create_engine('sqlite:///:memory:')
@@ -65,12 +65,31 @@ for category in query_category:
     print(f"{category.id}. {category.name} - {category.description}:")
     for product in category.products:
         print(f" *** Название: {product.name}, Цена: {product.price}, Наличие: {product.in_stock}")
+    print("-" * 70)
 
 '''Задача 3: Обновление данных
 Найдите в таблице products первый продукт с названием "Смартфон". Замените цену этого продукта на 349.99.'''
+product = session.query(Product).filter(Product.name == "Смартфон").first()
+product.price = 349.99
+session.commit()
+print("-" * 70)
+print(f" *** Название: {product.name}, Цена: {product.price}, Наличие: {product.in_stock}")
 
 '''Задача 4: Агрегация и группировка
 Используя агрегирующие функции и группировку, подсчитайте общее количество продуктов в каждой категории.'''
+total_prod_in_ctg = (session.query(Category.name, func.count(Product.id).label('count_products')).outerjoin(Product
+                    ).group_by(Category.id).order_by(Category.id).all())
+print("-" * 70)
+for item in total_prod_in_ctg:
+    print("-" * 70)
+    print(f"Категория: '{item[0]}' - Количество: {item[1]}")
+print("-" * 70)
 
 '''Задача 5: Группировка с фильтрацией
 Отфильтруйте и выведите только те категории, в которых более одного продукта.'''
+print("-" * 70)
+ctg_with_mult_prod = (session.query(Category.name, func.count(Product.id).label('count_products')).outerjoin(Product
+                    ).group_by(Category.id).having(func.count(Product.id) > 1).all())
+print("Категории с более чем 1 продуктом:")
+for item in ctg_with_mult_prod:
+    print(item[0])
